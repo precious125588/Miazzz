@@ -1,0 +1,16 @@
+{
+  "name": "mias-mdx-session",
+  "version": "1.0.0",
+  "description": "MIAS MDX Session Pairing Site",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build needed'"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
