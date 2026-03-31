@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MIAS MDX — Session Pairing</title>
+<meta name="description" content="MIAS MDX WhatsApp Bot Session Pairing Portal by PRECIOUS x">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050c05;--card:#0d1a0d;--border:#1a2e1a;--green:#25D366;--dark-green:#128C7E;--teal:#075E54;--text:#e0e8e0;--muted:#6b7c6b;--red:#e74c3c}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden}
+.mono{font-family:'JetBrains Mono',monospace}
+.text-glow{text-shadow:0 0 20px rgba(37,211,102,.5),0 0 40px rgba(37,211,102,.2)}
+.box-glow{box-shadow:0 0 30px rgba(37,211,102,.12),0 0 60px rgba(37,211,102,.04)}
+.border-glow{box-shadow:inset 0 0 20px rgba(37,211,102,.04),0 0 15px rgba(37,211,102,.08)}
+#matrix{position:fixed;inset:0;pointer-events:none;opacity:.25;z-index:0}
+#welcome{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+#welcome-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:420px;width:100%;text-align:center}
+.welcome-emoji{font-size:56px;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+.welcome-title{font-size:28px;font-weight:700;color:var(--green);margin-bottom:4px}
+.welcome-sub{font-size:12px;color:var(--muted)}
+.welcome-desc{color:rgba(224,232,224,.8);margin:20px 0 32px;font-size:15px;line-height:1.6}
+.welcome-desc span{color:var(--green);font-weight:600}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s}
+.btn-primary{background:var(--green);color:var(--bg);animation:pulse-glow 2s ease-in-out infinite}
+.btn-primary:hover{background:#1ebe5e}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-outline:hover{border-color:rgba(37,211,102,.4);color:var(--text)}
+.btn-ghost{background:transparent;border:none;color:var(--muted);padding:10px;width:100%}
+.btn-ghost:hover{color:var(--text)}
+.btn-full{width:100%}
+#transition{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center}
+#transition h1{font-size:clamp(28px,5vw,42px);font-weight:700;color:var(--green);margin-top:16px}
+#transition p{color:var(--muted);margin-top:12px;font-size:16px}
+.now-playing{display:flex;align-items:center;gap:8px;margin-top:20px;font-size:13px;color:var(--muted)}
+.now-playing .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1s infinite}
+#app{display:none;position:relative;z-index:10;min-height:100vh;padding:20px 16px}
+.app-inner{max-width:500px;margin:0 auto;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center}
+.brand{text-align:center;margin-bottom:28px}
+.brand-emoji{font-size:36px;animation:float 3s ease-in-out infinite}
+.brand-name{font-size:20px;font-weight:700;color:var(--green);margin-top:6px}
+.brand-sub{font-size:11px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%}
+.card-title{font-size:clamp(20px,4vw,26px);font-weight:700;color:var(--green);text-align:center}
+.card-sub{text-align:center;font-size:13px;color:var(--muted);margin-top:6px}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-dot.on{background:var(--green)}
+.status-dot.off{background:var(--red)}
+.status-row{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:10px;font-size:11px;color:var(--muted)}
+.method-btn{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:left;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px;margin-top:14px;font-family:'Space Grotesk',sans-serif}
+.method-btn:hover{border-color:rgba(37,211,102,.3);background:rgba(37,211,102,.03)}
+.method-icon{width:48px;height:48px;border-radius:12px;background:rgba(37,211,102,.08);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.method-label{font-size:15px;font-weight:600;color:var(--text)}
+.method-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.link-device-btn{width:100%;border:1px dashed rgba(37,211,102,.3);border-radius:14px;padding:14px;text-align:center;background:transparent;cursor:pointer;transition:all .2s;margin-top:14px;font-family:'Space Grotesk',sans-serif}
+.link-device-btn:hover{background:rgba(37,211,102,.04)}
+.link-device-btn .top{color:var(--green);font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px}
+.link-device-btn .bot{font-size:11px;color:var(--muted);margin-top:4px}
+.input-group{margin-top:16px}
+.input-group label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+.input-group input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:14px 16px;color:var(--text);font-size:17px;font-family:'JetBrains Mono',monospace;outline:none;transition:border .2s}
+.input-group input:focus{border-color:var(--green)}
+.input-group .hint{font-size:11px;color:var(--muted);margin-top:6px}
+.steps{background:rgba(37,211,102,.03);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:16px}
+.steps .step{font-size:12px;color:var(--muted);line-height:1.8}
+.steps .step strong{color:var(--text)}
+.steps .step .hl{color:var(--green)}
+.pairing-code{background:var(--bg);border:1px solid rgba(37,211,102,.3);border-radius:18px;padding:28px;text-align:center;margin:20px 0;animation:pulse-glow 2s ease-in-out infinite}
+.pairing-code .code{font-size:clamp(30px,7vw,44px);font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;letter-spacing:.15em}
+.qr-wrapper{background:#fff;border-radius:18px;padding:16px;display:inline-block;margin:20px 0}
+.qr-wrapper img{width:250px;height:250px;display:block}
+.session-box{background:var(--bg);border-radius:14px;padding:16px;margin:16px 0}
+.session-box .label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.session-box .val{font-size:11px;color:var(--text);font-family:'JetBrains Mono',monospace;word-break:break-all;max-height:100px;overflow-y:auto;line-height:1.6}
+.logs{background:var(--bg);border-radius:14px;padding:12px;margin-top:20px;max-height:140px;overflow-y:auto}
+.logs .title{font-size:11px;color:var(--muted);margin-bottom:6px}
+.log-entry{font-size:11px;font-family:'JetBrains Mono',monospace;line-height:1.8}
+.log-entry.success{color:var(--green)}
+.log-entry.error{color:var(--red)}
+.log-entry.info{color:var(--muted)}
+.loader{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto}
+#music-player{position:fixed;bottom:14px;right:14px;z-index:60;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px 14px;display:none;align-items:center;gap:10px;font-size:12px}
+#music-player .song{color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#music-player button{background:none;border:none;color:var(--green);cursor:pointer;font-size:16px;padding:2px}
+#music-player button:hover{opacity:.7}
+.footer{text-align:center;margin-top:28px;font-size:11px;color:var(--muted)}
+.footer span{color:var(--green)}
+#yt-player-wrap{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;overflow:hidden;pointer-events:none}
+.error-banner{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:14px;padding:14px;margin-top:14px;text-align:center}
+.error-banner .title{color:var(--red);font-weight:600;font-size:13px}
+.error-banner .desc{color:var(--muted);font-size:11px;margin-top:4px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 20px rgba(37,211,102,.15)}50%{box-shadow:0 0 40px rgba(37,211,102,.35),0 0 60px rgba(37,211,102,.15)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .6s ease-out}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div id="yt-player-wrap"><div id="yt-player"></div></div>
+
+<div id="welcome">
+  <div id="welcome-card" class="box-glow border-glow fade-in">
+    <div class="welcome-emoji">⚡</div>
+    <div class="welcome-title text-glow">MIAS MDX Session</div>
+    <div class="welcome-sub mono">v3.1.0 • 480+ Commands</div>
+    <div class="welcome-desc">Welcome to <span>MIAS MDX</span> session pairing portal.<br>Ready to link your WhatsApp?</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="acceptWelcome()">Yes, Let's Go! 🚀</button>
+      <button class="btn btn-outline" onclick="acceptWelcome()">Maybe Later</button>
+    </div>
+    <div style="margin-top:20px;font-size:11px;color:var(--muted)" class="mono">Powered by 𝑷𝑹𝑬𝑪𝑰𝑶𝑼𝑺 x</div>
+  </div>
+</div>
+
+<div id="transition">
+  <div class="welcome-emoji">⚡</div>
+  <h1 class="text-glow">Welcome to MIAS MDX</h1>
+  <p>Preparing your session...</p>
+  <div class="now-playing mono">
+    <span class="dot"></span>
+    <span>🎵 Now Playing: <span id="trans-song"></span></span>
+    <button onclick="toggleMusic()" id="trans-mute" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:16px">🔊</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="app-inner">
+    <div class="brand">
+      <div class="brand-emoji">⚡</div>
+      <div class="brand-name text-glow">MIAS MDX</div>
+      <div class="brand-sub mono">Session Pairing Portal • v3.1.0</div>
+    </div>
+    <div class="card box-glow border-glow" id="main-card"></div>
+    <div class="footer">⚡ Powered by <span>𝑷𝑹𝑬𝑪𝑰𝑶𝑼𝑺 x</span></div>
+  </div>
+</div>
+
+<div id="music-player" class="box-glow">
+  <span>🎵</span>
+  <span class="song mono" id="mp-song"></span>
+  <button onclick="toggleMusic()" id="mp-mute">🔊</button>
+  <button onclick="skipSong()">⏭</button>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+// ═══════════════════════════════════════════════════
+//  CONFIG — fetched from /config endpoint
+// ═══════════════════════════════════════════════════
+var BOT_WS_URL = "";
+
+(function loadConfig() {
+  fetch("/config").then(function(r){ return r.json(); }).then(function(c) {
+    BOT_WS_URL = c.botWsUrl || "";
+    if (!BOT_WS_URL) {
+      console.warn("BOT_WS_URL not set — will use same-origin fallback");
+    }
+  }).catch(function(){});
+})();
+
+// ═══════════════════════════════════════════════════
+//  YOUTUBE SONGS
+// ═══════════════════════════════════════════════════
+var SONGS = [
+  { title: "Calm Down - Rema", videoId: "CQLsdm1ZYAw" },
+  { title: "Essence - Wizkid ft Tems", videoId: "U4pCkMzBMCI" },
+  { title: "Last Last - Burna Boy", videoId: "jGJnEB5Hp-M" },
+  { title: "Rush - Ayra Starr", videoId: "fPJA1m3VRFQ" },
+  { title: "Love Nwantiti - CKay", videoId: "ioNng23DkIM" },
+  { title: "Peru - Fireboy DML", videoId: "mOBNOa1oLGQ" },
+  { title: "Sungba - Asake", videoId: "iqh4KLTTSUE" },
+  { title: "Bloody Samaritan - Ayra Starr", videoId: "V-QFDaMdpRA" },
+  { title: "Kilometre - Burna Boy", videoId: "UW-e4QSqMqw" },
+  { title: "UNAVAILABLE - Davido", videoId: "dNvOVey0MSs" },
+  { title: "Water - Tyla", videoId: "YLCm9u_wEUY" },
+  { title: "Snooze - SZA", videoId: "LahcSFleKm8" },
+  { title: "Die With A Smile - Lady Gaga", videoId: "kPa7bsKwL-c" },
+  { title: "APT. - ROSÉ ft Bruno Mars", videoId: "ekr2nIex040" },
+  { title: "Flowers - Miley Cyrus", videoId: "G7KNmW9a75Y" },
+  { title: "Ojuelegba - Wizkid", videoId: "MK4EwkoPxRI" },
+  { title: "Ye - Burna Boy", videoId: "ybnyVBKEa0c" },
+  { title: "Monalisa - Lojay ft Sarz", videoId: "1HI6NnwPDHE" },
+];
+var currentIdx = Math.floor(Math.random() * SONGS.length);
+var ytPlayer = null, isPlaying = false, ytReady = false;
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player("yt-player", {
+    height:"1",width:"1",
+    videoId: SONGS[currentIdx].videoId,
+    playerVars:{autoplay:0,controls:0,disablekb:1,fs:0,modestbranding:1,rel:0,showinfo:0,origin:location.origin},
+    events:{
+      onReady:function(e){ytReady=true;e.target.setVolume(45);},
+      onStateChange:function(e){if(e.data===YT.PlayerState.ENDED)skipSong();},
+      onError:function(){skipSong();}
+    }
+  });
+}
+function playMusic(){if(!ytReady||!ytPlayer)return;ytPlayer.loadVideoById(SONGS[currentIdx].videoId);ytPlayer.setVolume(45);isPlaying=true;updateSongUI();}
+function toggleMusic(){if(!ytPlayer)return;if(isPlaying)ytPlayer.pauseVideo();else ytPlayer.playVideo();isPlaying=!isPlaying;updateSongUI();}
+function skipSong(){currentIdx=Math.floor(Math.random()*SONGS.length);playMusic();}
+function updateSongUI(){var t=SONGS[currentIdx].title,icon=isPlaying?"🔊":"🔇";var e1=document.getElementById("mp-song");if(e1)e1.textContent=t;var e2=document.getElementById("trans-song");if(e2)e2.textContent=t;var e3=document.getElementById("mp-mute");if(e3)e3.textContent=icon;var e4=document.getElementById("trans-mute");if(e4)e4.textContent=icon;}
+
+// ═══════════════════════════════════════════════════
+//  MATRIX RAIN
+// ═══════════════════════════════════════════════════
+(function(){var c=document.getElementById("matrix"),ctx=c.getContext("2d");function resize(){c.width=innerWidth;c.height=innerHeight;}resize();addEventListener("resize",resize);var chars="MIAS MDX 01アイウエオカキク♠♣♥♦★⚡".split("");var fs=14,cols=Math.floor(c.width/fs);var drops=Array(cols).fill(1);setInterval(function(){ctx.fillStyle="rgba(5,12,5,0.05)";ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle="#25D366";ctx.font=fs+"px monospace";for(var i=0;i<drops.length;i++){ctx.globalAlpha=Math.random()*.3+.1;ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*fs,drops[i]*fs);if(drops[i]*fs>c.height&&Math.random()>.975)drops[i]=0;drops[i]++;}ctx.globalAlpha=1;},50);})();
+
+// ═══════════════════════════════════════════════════
+//  WHATSAPP DEEP LINK
+// ═══════════════════════════════════════════════════
+function forceOpenWA(){var ua=navigator.userAgent;if(/Android/i.test(ua)){location.href="intent://settings#Intent;scheme=whatsapp;package=com.whatsapp;end";setTimeout(function(){window.open("https://web.whatsapp.com","_blank");},2000);}else if(/iPhone|iPad|iPod/i.test(ua)){location.href="whatsapp://settings";setTimeout(function(){window.open("https://web.whatsapp.com","_blank");},2000);}else{window.open("https://web.whatsapp.com","_blank");}addLog("📱 Opening WhatsApp → Linked Devices → Link a Device","info");}
+
+// ═══════════════════════════════════════════════════
+//  WELCOME
+// ═══════════════════════════════════════════════════
+function acceptWelcome(){document.getElementById("welcome").style.display="none";document.getElementById("transition").style.display="flex";updateSongUI();playMusic();setTimeout(function(){document.getElementById("transition").style.display="none";document.getElementById("app").style.display="block";document.getElementById("music-player").style.display="flex";showMethodSelect();},2500);}
+
+// ═══════════════════════════════════════════════════
+//  WEBSOCKET — connects to bot server
+// ═══════════════════════════════════════════════════
+var ws=null,logs=[],connected=false;
+
+function getWsUrl(){
+  // If BOT_WS_URL is set (e.g. wss://my-bot.onrender.com/session-ws), use it
+  if(BOT_WS_URL) return BOT_WS_URL;
+  // Otherwise fallback to same origin
+  var p=location.protocol==="https:"?"wss:":"ws:";
+  return p+"//"+location.host+"/session-ws";
+}
+
+function connectWS(cb){
+  if(ws&&ws.readyState===WebSocket.OPEN){if(cb)cb();return;}
+  var url=getWsUrl();
+  if(!url||url.indexOf("session-ws")===-1){
+    addLog("Bot server not configured. Set BOT_WS_URL env variable.","error");
+    return;
+  }
+  try{
+    ws=new WebSocket(url);
+    ws.onopen=function(){connected=true;addLog("Connected to MIAS MDX server","success");updateStatus();if(cb)cb();};
+    ws.onmessage=function(e){handleMessage(JSON.parse(e.data));};
+    ws.onclose=function(){connected=false;addLog("Disconnected","error");updateStatus();};
+    ws.onerror=function(){connected=false;addLog("Connection error — is bot running?","error");updateStatus();};
+  }catch(e){addLog("Failed to connect","error");}
+}
+
+function handleMessage(data){
+  switch(data.type){
+    case"qr":document.getElementById("qr-area").innerHTML='<div class="qr-wrapper"><img src="'+data.qrUrl+'" alt="QR"></div><p style="font-size:13px;color:var(--muted)">Scan with WhatsApp → Linked Devices</p>';hideLoader();addLog("QR code received","info");forceOpenWA();break;
+    case"pairing_code":showPairingCode(data.code);hideLoader();addLog("Pairing code: "+data.code,"success");setTimeout(forceOpenWA,800);break;
+    case"session":showSessionResult(data.sessionId);hideLoader();addLog("Session ID generated!","success");break;
+    case"log":addLog(data.text,data.level||"info");break;
+    case"error":addLog(data.text,"error");hideLoader();break;
+  }
+}
+
+function addLog(t,l){logs.push({text:t,level:l});if(logs.length>12)logs.shift();renderLogs();}
+function renderLogs(){var el=document.getElementById("log-area");if(!el)return;el.style.display="block";el.innerHTML='<div class="title mono">Connection Log:</div>'+logs.map(function(l){return'<div class="log-entry '+l.level+'">'+(l.level==="success"?"✓":l.level==="error"?"✗":"→")+" "+l.text+"</div>";}).join("");el.scrollTop=el.scrollHeight;}
+function updateStatus(){var el=document.getElementById("status-indicator");if(el)el.innerHTML='<span class="status-dot '+(connected?"on":"off")+'"></span><span class="mono" style="font-size:11px;color:var(--muted)">'+(connected?"Connected":"Not connected")+"</span>";}
+function hideLoader(){var el=document.getElementById("loader-area");if(el)el.style.display="none";}
+
+// ═══════════════════════════════════════════════════
+//  VIEWS
+// ═══════════════════════════════════════════════════
+function showMethodSelect(){
+  var noBot=!BOT_WS_URL;
+  var card=document.getElementById("main-card");
+  card.innerHTML='\
+    <div class="card-title text-glow">Link Your WhatsApp</div>\
+    <div class="card-sub">Choose a pairing method below</div>\
+    <div id="status-indicator" class="status-row"></div>\
+    '+(noBot?'<div class="error-banner"><div class="title">⚠️ Bot Server Not Set</div><div class="desc">Set BOT_WS_URL env var pointing to your bot (e.g. wss://my-bot.onrender.com/session-ws)</div></div>':'')+'\
+    <button class="method-btn" onclick="showPhoneInput()">\
+      <div class="method-icon">📱</div>\
+      <div><div class="method-label">Phone Number</div><div class="method-desc">Get a pairing code via your number</div></div>\
+    </button>\
+    <button class="method-btn" onclick="startQR()">\
+      <div class="method-icon">📷</div>\
+      <div><div class="method-label">QR Code</div><div class="method-desc">Scan QR code from WhatsApp</div></div>\
+    </button>\
+    <button class="link-device-btn" onclick="forceOpenWA()">\
+      <div class="top">🔗 Open WhatsApp Link Device</div>\
+      <div class="bot">Force-opens WhatsApp linked devices screen</div>\
+    </button>\
+    <div class="logs" id="log-area" style="display:'+(logs.length?"block":"none")+'"></div>';
+  updateStatus();if(logs.length)renderLogs();
+}
+
+function showPhoneInput(){
+  connectWS();
+  var card=document.getElementById("main-card");
+  card.innerHTML='\
+    <div class="card-title text-glow">Enter Your Number</div>\
+    <div class="card-sub">We\'ll send a pairing code to your WhatsApp</div>\
+    <div class="input-group">\
+ 
